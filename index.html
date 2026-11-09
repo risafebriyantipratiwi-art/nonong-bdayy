@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Happy Birthday nononggss!</title>
+  <style>
+    :root {
+      --primary: #ff6b81;
+      --secondary: #ffa502;
+      --accent: #70a1ff;
+      --bg-start: #ffecd2;
+      --bg-end: #fcb69f;
+      --text: #2f3542;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-x: hidden;
+      color: var(--text);
+    }
+
+    .container {
+      width: 90%;
+      max-width: 600px;
+      text-align: center;
+      position: relative;
+    }
+
+    .card-container {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+      border: 1px solid rgba(255,255,255,0.5);
+      animation: fadeIn 0.8s ease-in-out;
+    }
+
+    h1 {
+      color: var(--primary);
+      margin-bottom: 15px;
+      font-size: 2.2rem;
+    }
+
+    p {
+      line-height: 1.6;
+      margin-bottom: 20px;
+      font-size: 1.1rem;
+    }
+
+    .btn {
+      background: linear-gradient(45deg, var(--primary), var(--secondary));
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(255, 107, 129, 0.4);
+      transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 8px 20px rgba(255, 107, 129, 0.6);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Game Styling */
+    #gameCanvas {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 15px;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+      touch-action: none;
+      max-width: 100%;
+    }
+
+    .game-hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+
+    /* Floating Gift Animation */
+    .floating-gift {
+      font-size: 4rem;
+      animation: float 2s infinite ease-in-out;
+      margin-bottom: 10px;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Audio Toggle Floating Button */
+    .audio-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(255,255,255,0.8);
+      border: none;
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      z-index: 100;
+    }
+
+    #confettiCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 99;
+    }
+
+    .bday-text {
+      white-space: pre-line;
+      text-align: left;
+      font-size: 1.05rem;
+      color: #444;
+    }
+  </style>
+</head>
+<body>
+
+  <button class="audio-btn" id="audioToggle" onclick="toggleAudio()">🔊</button>
+  <canvas id="confettiCanvas"></canvas>
+
+  <div class="container">
+    <!-- Screen 1: Welcome -->
+    <section id="welcome" class="card-container">
+      <div class="floating-gift">🎁</div>
+      <h1>ada kejutan buat nonong!</h1>
+      <p>Sebelum buka kado utamanya, nonong harus main game kecil dulu! Tangkap kado & kue ultah sampai skor nonong mencapai <strong>8</strong> yaaa!</p>
+      <button class="btn" onclick="startGame()">Mulai Game 🚀</button>
+    </section>
+
+    <!-- Screen 2: Mini Game -->
+    <section id="gameSection" class="card-container hidden">
+      <div class="game-hud">
+        <span>Target: 8</span>
+        <span>Skor: <span id="scoreText" style="color:var(--primary)">0</span></span>
+      </div>
+      <canvas id="gameCanvas" width="340" height="400"></canvas>
+      <p style="font-size: 0.85rem; color: #666; margin-top: 10px;">
+        Geser/Sentuh layar HP nonong untuk menggerakkan keranjang!
+      </p>
+    </section>
+
+    <!-- Screen 3: Birthday Surprise Card (No Photo) -->
+    <section id="surprise" class="card-container hidden">
+      <h2>🎉 Happy Birthday, nadiaa! 🎉</h2>
+
+      <p id="bdayText" class="bday-text">
+Selamat ulang tahun yaa nonong! ✨
+
+Di hari yang spesial ini, aku cuma mau bilang terima kasih udah jadi sahabat terbaik sekaligus adik buat aku. Makasih udah selalu ada, dengerin curhatan aku sampe bingung mau jawab apa, dan makasi jugaa udah bagi bagi tawanya nonong ke aku.
+
+Semoga di usia yang baru ini nonong nemuin banyak hal baik, sehat selalu, dikasi banyak kebahagiaan sama Allah dan semua impian nonong bisa tercapai! Tetap jadi pribadi yang baik dan ceria yaaa!
+
+aku sayang nonongg! 🥳🎈🎂
+      </p>
+      <button class="btn" onclick="restartGame()">Main Lagi 🔄</button>
+    </section>
+  </div>
+
+  <script>
+    // --- Synthesizer Sound Effects (Web Audio API) ---
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let audioCtx;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new AudioCtx();
+      }
+    }
+
+    function playCatchSound() {
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1);
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.1);
+    }
+
+    function playBombSound() {
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+      osc.frequency.linearRampToValueAtTime(80, audioCtx.currentTime + 0.2);
+      gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.2);
+    }
+
+    // --- Happy Birthday Song Synthesizer ---
+    let isPlayingBdaySong = false;
+    let songInterval;
+
+    const notes = {
+      'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23,
+      'G4': 392.00, 'A4': 440.00, 'B4': 493.88, 'C5': 523.25
+    };
+
+    const song = [
+      {note: 'C4', dur: 0.3}, {note: 'C4', dur: 0.3}, {note: 'D4', dur: 0.6}, {note: 'C4', dur: 0.6}, {note: 'F4', dur: 0.6}, {note: 'E4', dur: 1.2},
+      {note: 'C4', dur: 0.3}, {note: 'C4', dur: 0.3}, {note: 'D4', dur: 0.6}, {note: 'C4', dur: 0.6}, {note: 'G4', dur: 0.6}, {note: 'F4', dur: 1.2},
+      {note: 'C4', dur: 0.3}, {note: 'C4', dur: 0.3}, {note: 'C5', dur: 0.6}, {note: 'A4', dur: 0.6}, {note: 'F4', dur: 0.6}, {note: 'E4', dur: 0.6}, {note: 'D4', dur: 0.6},
+      {note: 'B4', dur: 0.3}, {note: 'B4', dur: 0.3}, {note: 'A4', dur: 0.6}, {note: 'F4', dur: 0.6}, {note: 'G4', dur: 0.6}, {note: 'F4', dur: 1.2}
+    ];
+
+    function playBdaySong() {
+      initAudio();
+      if (isPlayingBdaySong) return;
+      isPlayingBdaySong = true;
+      let idx = 0;
+
+      function playNextNote() {
+        if (!isPlayingBdaySong) return;
+        const n = song[idx];
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'triangle';
+        osc.frequency.value = notes[n.note];
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + n.dur);
+        osc.start();
+        osc.stop(audioCtx.currentTime + n.dur);
+
+        idx = (idx + 1) % song.length;
+        songInterval = setTimeout(playNextNote, n.dur * 600);
+      }
+      playNextNote();
+    }
+
+    function stopBdaySong() {
+      isPlayingBdaySong = false;
+      clearTimeout(songInterval);
+    }
+
+    function toggleAudio() {
+      const btn = document.getElementById('audioToggle');
+      if (isPlayingBdaySong) {
+        stopBdaySong();
+        btn.textContent = '🔇';
+      } else {
+        playBdaySong();
+        btn.textContent = '🔊';
+      }
+    }
+
+    // --- Game Logic ---
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    let score = 0;
+    const targetScore = 8;
+    let gameLoop;
+    let items = [];
+    
+    const player = {
+      x: canvas.width / 2 - 25,
+      y: canvas.height - 35,
+      width: 50,
+      height: 25,
+      speed: 7
+    };
+
+    let keys = {};
+
+    window.addEventListener('keydown', e => keys[e.key] = true);
+    window.addEventListener('keyup', e => keys[e.key] = false);
+
+    // Touch/Mouse Drag Control
+    let isDragging = false;
+    canvas.addEventListener('pointerdown', e => {
+      isDragging = true;
+      movePlayer(e);
+    });
+    canvas.addEventListener('pointermove', e => {
+      if (isDragging) movePlayer(e);
+    });
+    window.addEventListener('pointerup', () => isDragging = false);
+
+    function movePlayer(e) {
+      const rect = canvas.getBoundingClientRect();
+      const touchX = e.clientX - rect.left;
+      player.x = touchX - player.width / 2;
+      if (player.x < 0) player.x = 0;
+      if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+    }
+
+    function spawnItem() {
+      const types = [
+        { icon: '🎁', points: 1 },
+        { icon: '🍰', points: 1 },
+        { icon: '⭐', points: 1 },
+        { icon: '⚡', points: -1 }
+      ];
+      const selected = types[Math.floor(Math.random() * types.length)];
+      items.push({
+        x: Math.random() * (canvas.width - 30),
+        y: -30,
+        speed: 2 + Math.random() * 2,
+        icon: selected.icon,
+        points: selected.points
+      });
+    }
+
+    function updateGame() {
+      // Key Movement
+      if (keys['ArrowLeft'] && player.x > 0) player.x -= player.speed;
+      if (keys['ArrowRight'] && player.x + player.width < canvas.width) player.x += player.speed;
+
+      // Clear Canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw Player Basket
+      ctx.fillStyle = '#ff6b81';
+      ctx.beginPath();
+      ctx.roundRect(player.x, player.y, player.width, player.height, 10);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.font = '14px sans-serif';
+      ctx.fillText('🧺', player.x + 16, player.y + 18);
+
+      // Update & Draw Items
+      for (let i = items.length - 1; i >= 0; i--) {
+        const item = items[i];
+        item.y += item.speed;
+
+        ctx.font = '24px sans-serif';
+        ctx.fillText(item.icon, item.x, item.y);
+
+        // Catch Collision Detection
+        if (
+          item.y + 20 >= player.y &&
+          item.x + 20 >= player.x &&
+          item.x <= player.x + player.width
+        ) {
+          score += item.points;
+          if (score < 0) score = 0;
+          document.getElementById('scoreText').textContent = score;
+
+          if (item.points > 0) {
+            playCatchSound();
+          } else {
+            playBombSound();
+          }
+
+          items.splice(i, 1);
+
+          // Check Win Condition
+          if (score >= targetScore) {
+            endGame();
+            return;
+          }
+          continue;
+        }
+
+        // Remove Off-screen Items
+        if (item.y > canvas.height) {
+          items.splice(i, 1);
+        }
+      }
+    }
+
+    let spawnTimer;
+    function startGame() {
+      initAudio();
+      document.getElementById('welcome').classList.add('hidden');
+      document.getElementById('gameSection').classList.remove('hidden');
+      score = 0;
+      items = [];
+      document.getElementById('scoreText').textContent = score;
+      
+      gameLoop = setInterval(updateGame, 1000 / 60);
+      spawnTimer = setInterval(spawnItem, 700);
+    }
+
+    function endGame() {
+      clearInterval(gameLoop);
+      clearInterval(spawnTimer);
+      document.getElementById('gameSection').classList.add('hidden');
+      document.getElementById('surprise').classList.remove('hidden');
+      
+      startConfetti();
+      playBdaySong();
+    }
+
+    function restartGame() {
+      document.getElementById('surprise').classList.add('hidden');
+      stopBdaySong();
+      startGame();
+    }
+
+    // --- Confetti Effect ---
+    const cCanvas = document.getElementById('confettiCanvas');
+    const cCtx = cCanvas.getContext('2d');
+    let confettiList = [];
+
+    function resizeConfetti() {
+      cCanvas.width = window.innerWidth;
+      cCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeConfetti);
+    resizeConfetti();
+
+    function startConfetti() {
+      confettiList = [];
+      const colors = ['#ff6b81', '#ffa502', '#70a1ff', '#2ed573', '#ff7f50'];
+      for (let i = 0; i < 100; i++) {
+        confettiList.push({
+          x: Math.random() * cCanvas.width,
+          y: Math.random() * cCanvas.height - cCanvas.height,
+          size: Math.random() * 8 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          speedY: Math.random() * 3 + 2,
+          speedX: Math.random() * 2 - 1
+        });
+      }
+      animateConfetti();
+    }
+
+    function animateConfetti() {
+      cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height);
+      confettiList.forEach((p) => {
+        p.y += p.speedY;
+        p.x += p.speedX;
+        cCtx.fillStyle = p.color;
+        cCtx.beginPath();
+        cCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        cCtx.fill();
+      });
+
+      if (document.getElementById('surprise').classList.contains('hidden') === false) {
+        requestAnimationFrame(animateConfetti);
+      } else {
+        cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height);
+      }
+    }
+  </script>
+</body>
+</html>
